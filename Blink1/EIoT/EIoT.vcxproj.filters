@@ -30,12 +30,21 @@
     <ClInclude Include="EEPROM_Helper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="EIoT.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="EIoT_Init.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="EIoTCloudRestApiV1.0.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="EEPROM_Helper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="EIoT_Init.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
