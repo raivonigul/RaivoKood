@@ -5,11 +5,6 @@
 #include "EIoT.h"
 #include "EIoT_Init.h"
 
-//String moduleId = "";
-//String parameterId = "";
-//String parameterId2 = "";
-
-
 void createNewConfig(StoreStruct storage,  EIoTCloudRestApi eiotcloud)
 {
 	String token = eiotcloud.TokenNew(INSTANCE_ID);
@@ -107,5 +102,4 @@ void createNewConfig(StoreStruct storage,  EIoTCloudRestApi eiotcloud)
 	valueRet = eiotcloud.SetParameterAverageInterval(parameterId, "10");
 	DEBUG_PRINT("SetAvreageInterval: ");
 	DEBUG_PRINTLN(valueRet);
-
 }

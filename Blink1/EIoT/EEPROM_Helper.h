@@ -11,7 +11,6 @@
 #include "EIoT.h"
 
 #define CONFIG_START 0
-#define CONFIG_VERSION "v02"
 
 
 void loadConfig(StoreStruct storage);

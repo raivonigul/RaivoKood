@@ -7,7 +7,13 @@
   #include "WProgram.h"
 #endif
 
+#define CONFIG_VERSION "v02"
 #define INSTANCE_ID "58bdd09747976c2bde23fa00"
+#define AP_USERNAME "NisuWiFi"
+#define AP_PASSWORD "nigulikodu147"
+
+#define DEBUG_PROG 
+
 #ifdef DEBUG_PROG
 #define DEBUG_PRINTLN(x)  Serial.println(x)
 #define DEBUG_PRINT(x)    Serial.print(x)
