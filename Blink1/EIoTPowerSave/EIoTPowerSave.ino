@@ -11,10 +11,22 @@ ADC_MODE(ADC_VCC); //vcc read-mode
 //#include <ESP8266WiFiGeneric.h>
 //#include <ESP8266WiFiAP.h>
 #include <ESP8266WiFi.h>
+
 extern "C" {
 #include "user_interface.h" // this is for the RTC memory read/write functions
 }
 
+#define DEBUG_PROG
+
+#ifdef DEBUG_PROG
+#define DEBUG_PRINTLN(x)  Serial.println(x)
+#define DEBUG_PRINT(x)    Serial.print(x)
+#define REPORT_INTERVAL 1
+#else
+#define DEBUG_PRINTLN(x) 
+#define DEBUG_PRINT(x)
+#define REPORT_INTERVAL 10
+#endif
 
 #define RTCMEMORYSTART 66
 #define RTCMEMORYLEN 125
@@ -22,7 +34,7 @@ extern "C" {
 
 #define COLLECT 17
 #define SEND 66
-#define SLEEPTIME 1000000
+#define SLEEPTIME 60*1*1000000
 
 #define SPARKFUN_BATTERY 1
 
@@ -51,9 +63,9 @@ unsigned long startTime;
 
 void setup() {
 	Serial.begin(115200);
-	Serial.println();
-	Serial.println();
-	Serial.print("Booted ");
+	DEBUG_PRINTLN();
+	DEBUG_PRINTLN();
+	DEBUG_PRINTLN("Booted ");
 
 
 	rst_info *rsti;
@@ -62,10 +74,10 @@ void setup() {
 	switch (rsti->reason) {
 
 	case 5:
-		Serial.println(" from RTC-RESET (ResetInfo.reason = 5)");
+		DEBUG_PRINTLN(" from RTC-RESET (ResetInfo.reason = 5)");
 		break;
 	case 6:
-		Serial.println(" from POWER-UP (ResetInfo.reason = 6)");
+		DEBUG_PRINTLN(" from POWER-UP (ResetInfo.reason = 6)");
 		rtcManagement.magicNumber = COLLECT;
 		rtcManagement.valueCounter = 0;
 		break;
@@ -75,23 +87,23 @@ void setup() {
 
 	buckets = (sizeof(rtcValues) / 4);
 	if (buckets == 0) buckets = 1;
-	// Serial.print("Buckets ");
-	//  Serial.println(buckets);
+	// DEBUG_PRINT("Buckets ");
+	//  DEBUG_PRINTLN(buckets);
 	system_rtc_mem_read(64, &rtcManagement, 8);
-	// Serial.print("Magic Number ");
-	//  Serial.println(rtcManagement.magicNumber);
+	// DEBUG_PRINT("Magic Number ");
+	//  DEBUG_PRINTLN(rtcManagement.magicNumber);
 
 	// initialize System after first start
 	if (rtcManagement.magicNumber != COLLECT && rtcManagement.magicNumber != SEND) {
 		rtcManagement.magicNumber = COLLECT;
 		rtcManagement.valueCounter = 0;
 		system_rtc_mem_write(64, &rtcManagement, 8);
-		Serial.println("Initial values set");
+		DEBUG_PRINTLN("Initial values set");
 		ESP.deepSleep(10, WAKE_RF_DISABLED);
 	}
 	if (rtcManagement.magicNumber == COLLECT) {   // Read sensor and store
 		if (rtcManagement.valueCounter <= RTCMEMORYLEN / buckets) {
-			Serial.println("Sensor reads");
+			DEBUG_PRINTLN("Sensor reads");
 
 			rtcValues.battery = ESP.getVcc() * VCC_ADJ;
 			rtcValues.other = rtcManagement.valueCounter;
@@ -101,60 +113,60 @@ void setup() {
 			system_rtc_mem_write(rtcPos, &rtcValues, 4);
 			system_rtc_mem_write(64, &rtcManagement, 4);
 
-			Serial.print("Counter : ");
-			Serial.print(rtcManagement.valueCounter);
-			Serial.print(" Position: ");
-			Serial.print(rtcPos);
-			Serial.print(", battery: ");
-			Serial.print(rtcValues.battery);
+			DEBUG_PRINT("Counter : ");
+			DEBUG_PRINT(rtcManagement.valueCounter);
+			DEBUG_PRINT(" Position: ");
+			DEBUG_PRINT(rtcPos);
+			DEBUG_PRINT(", battery: ");
+			DEBUG_PRINT(rtcValues.battery);
 			rtcManagement.valueCounter++;
 			system_rtc_mem_write(64, &rtcManagement, 8);
-			Serial.println("before sleep W/O RF");
+			DEBUG_PRINTLN("before sleep W/O RF");
 			ESP.deepSleep(SLEEPTIME, WAKE_NO_RFCAL);
 		}
 		else {    // set initial values
 			rtcManagement.magicNumber = SEND;
 			rtcManagement.valueCounter = 0;
 			system_rtc_mem_write(64, &rtcManagement, 8);
-			Serial.println("before sleep w RF");
+			DEBUG_PRINTLN("before sleep w RF");
 			ESP.deepSleep(10, WAKE_RFCAL);
 		}
 	}
 	else {  // Send to Cloud
 		startTime = millis();
-		Serial.println();
-		Serial.println();
+		DEBUG_PRINTLN();
+		DEBUG_PRINTLN();
 		WiFi.mode(WIFI_STA);
-		Serial.print("Start Sending values. Connecting to ");
-		//  Serial.println(ASP_ssid);
+		DEBUG_PRINT("Start Sending values. Connecting to ");
+		//  DEBUG_PRINTLN(ASP_ssid);
 		//  WiFi.begin(ASP_ssid, ASP_password);
 
 		while (WiFi.status() != WL_CONNECTED) {
 			delay(500);
-			Serial.print(".");
+			DEBUG_PRINT(".");
 		}
-		Serial.println("Sending ");
+		DEBUG_PRINTLN("Sending ");
 
 		for (i = 0; i <= RTCMEMORYLEN / buckets; i++) {
 			int rtcPos = RTCMEMORYSTART + i * buckets;
 			system_rtc_mem_read(rtcPos, &rtcValues, sizeof(rtcValues));
-			Serial.print("i: ");
-			Serial.print(i);
-			Serial.print(" Position ");
-			Serial.print(rtcPos);
-			Serial.print(", battery: ");
-			Serial.print(rtcValues.battery);
-			Serial.print(", other: ");
-			Serial.println(rtcValues.other);
+			DEBUG_PRINT("i: ");
+			DEBUG_PRINT(i);
+			DEBUG_PRINT(" Position ");
+			DEBUG_PRINT(rtcPos);
+			DEBUG_PRINT(", battery: ");
+			DEBUG_PRINT(rtcValues.battery);
+			DEBUG_PRINT(", other: ");
+			DEBUG_PRINTLN(rtcValues.other);
 			//sendSparkfun(SPARKFUN_BATTERY, rtcValues.other, rtcValues.battery);
 			yield();
 		}
 		rtcManagement.magicNumber = COLLECT;
 		rtcManagement.valueCounter = 0;
 		system_rtc_mem_write(64, &rtcManagement, 8);
-		Serial.print("Writing to Cloud done. It took ");
-		Serial.print(millis() - startTime) / 1000.0;
-		Serial.println(" Seconds ");
+		DEBUG_PRINT("Writing to Cloud done. It took ");
+		DEBUG_PRINT(millis() - startTime) / 1000.0;
+		DEBUG_PRINTLN(" Seconds ");
 		ESP.deepSleep(SLEEPTIME, WAKE_NO_RFCAL);
 	}
 }
