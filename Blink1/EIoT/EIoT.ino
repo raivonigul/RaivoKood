@@ -37,7 +37,7 @@ void setup() {
 	DEBUG_PRINTLN("Start...");
 	pinMode(LED_PIN, OUTPUT);
 	digitalWrite(LED_PIN, HIGH);
-	loadConfig(storage);
+	loadConfig(@storage);
 
 	eiotcloud.begin(AP_USERNAME, AP_PASSWORD);
 
@@ -69,25 +69,25 @@ void setup() {
 void loop() {
 	float temp;
 
-	do {
-		DS18B20.requestTemperatures();
-		temp = DS18B20.getTempCByIndex(0);
-		DEBUG_PRINT("Temperature: ");
-		DEBUG_PRINTLN(temp);
-	} while (temp == 85.0 || temp == (-127.0));
+	//do {
+	//	DS18B20.requestTemperatures();
+	//	temp = DS18B20.getTempCByIndex(0);
+	//	DEBUG_PRINT("Temperature: ");
+	//	DEBUG_PRINTLN(temp);
+	//} while (temp == 85.0 || temp == (-127.0));
 
 	float vcc = ESP.getVcc() / 851.5;
 	DEBUG_PRINT("Vcc: ");
 	DEBUG_PRINTLN(vcc);
 
 
-	if (tempOld != temp)
+	if (tempOld != vcc)
 	{
 		// send temperature
-		bool valueRet = eiotcloud.SetParameterValue(parameterId, String(temp));
+		bool valueRet = eiotcloud.SetParameterValue(parameterId, String(vcc));
 		DEBUG_PRINT("SetParameterValue: ");
 		DEBUG_PRINTLN(valueRet);
-		tempOld = temp;
+		tempOld = vcc;
 	}
 	if (vccOld != vcc)
 	{

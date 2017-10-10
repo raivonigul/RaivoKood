@@ -13,8 +13,8 @@
 #define CONFIG_START 0
 
 
-void loadConfig(StoreStruct storage);
-void saveConfig(StoreStruct storage);
+void loadConfig(StoreStruct* storage);
+void saveConfig(StoreStruct* storage);
 
 #endif
 

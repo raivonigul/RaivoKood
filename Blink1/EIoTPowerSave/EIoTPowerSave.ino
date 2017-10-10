@@ -87,8 +87,8 @@ void setup() {
 
 	buckets = (sizeof(rtcValues) / 4);
 	if (buckets == 0) buckets = 1;
-	// DEBUG_PRINT("Buckets ");
-	//  DEBUG_PRINTLN(buckets);
+	DEBUG_PRINT("Buckets ");
+	DEBUG_PRINTLN(buckets);
 	system_rtc_mem_read(64, &rtcManagement, 8);
 	// DEBUG_PRINT("Magic Number ");
 	//  DEBUG_PRINTLN(rtcManagement.magicNumber);
