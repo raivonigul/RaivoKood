@@ -12,7 +12,7 @@
 
 
 
-void createNewConfig(StoreStruct storage, EIoTCloudRestApi eiotcloud);
+void createNewConfig(struct StoreStruct *storage, EIoTCloudRestApi eiotcloud);
 
 #endif
 

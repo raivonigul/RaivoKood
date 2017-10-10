@@ -9,7 +9,7 @@
 
 #define CONFIG_VERSION "v03"
 #define INSTANCE_ID "58bdd09747976c2bde23fa00"
-#define AP_USERNAME "NisuWiFi"
+#define AP_USERNAME "raivosuvila"
 #define AP_PASSWORD "nigulikodu147"
 
 #define DEBUG_PROG 

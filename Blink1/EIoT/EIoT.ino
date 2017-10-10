@@ -37,7 +37,10 @@ void setup() {
 	DEBUG_PRINTLN("Start...");
 	pinMode(LED_PIN, OUTPUT);
 	digitalWrite(LED_PIN, HIGH);
-	loadConfig(@storage);
+	DEBUG_PRINT("Storage ino size: ");
+	DEBUG_PRINTLN(sizeof(storage));
+
+	loadConfig(&storage, sizeof(storage));
 
 	eiotcloud.begin(AP_USERNAME, AP_PASSWORD);
 
@@ -45,8 +48,11 @@ void setup() {
 	// here hapend Plug and play logic to add module to Cloud
 	if (storage.moduleId == 0)
 	{
-		createNewConfig(storage, eiotcloud);
-		// save configuration
+		createNewConfig(&storage, eiotcloud);
+		DEBUG_PRINT("createNewConfig returned storage.moduleId: ");
+		DEBUG_PRINTLN(storage.moduleId);
+
+		 //save configuration
 		saveConfig(storage);
 	}
 
@@ -56,6 +62,8 @@ void setup() {
 
 	// read module ID from storage
 	moduleId = String(storage.moduleId);
+	DEBUG_PRINT("moduleId: ");
+	DEBUG_PRINTLN(moduleId);
 	// read token ID from storage
 	eiotcloud.SetToken(storage.token);
 	// read Sensor.Parameter1 ID from cloud
@@ -99,7 +107,7 @@ void loop() {
 	}
 
 	for (int i = 0; i < REPORT_INTERVAL; i++) {
-		for (int j = 0; j < 15; j++) {
+		for (int j = 0; j < 5; j++) {
 			digitalWrite(LED_PIN, HIGH);   // turn the LED on (HIGH is the voltage level)
 			delay(100);              // wait for a second
 			digitalWrite(LED_PIN, LOW);    // turn the LED off by making the voltage LOW

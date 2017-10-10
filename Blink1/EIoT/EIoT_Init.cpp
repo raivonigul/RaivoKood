@@ -5,7 +5,7 @@
 #include "EIoT.h"
 #include "EIoT_Init.h"
 
-void createNewConfig(StoreStruct storage,  EIoTCloudRestApi eiotcloud)
+void createNewConfig(struct StoreStruct *storage,  EIoTCloudRestApi eiotcloud)
 {
 	String token = eiotcloud.TokenNew(INSTANCE_ID);
 	DEBUG_PRINT("Token: ");
@@ -13,14 +13,16 @@ void createNewConfig(StoreStruct storage,  EIoTCloudRestApi eiotcloud)
 	eiotcloud.SetToken(token);
 
 	// remember token
-	token.toCharArray(storage.token, 41);
+	token.toCharArray(storage->token, 41);
 	//***********************************************************
 	// add new module and configure it
 	//**********************************************************
 	String moduleId = eiotcloud.ModuleNew();
-	DEBUG_PRINT("ModuleId: ");
+	DEBUG_PRINT("createNewConfig ModuleId: ");
 	DEBUG_PRINTLN(moduleId);
-	storage.moduleId = moduleId.toInt();
+	storage->moduleId = moduleId.toInt();
+	DEBUG_PRINT("createNewConfig storage.moduleId: ");
+	DEBUG_PRINTLN(storage->moduleId);
 
 	// set module type
 	bool modtyperet = eiotcloud.SetModulType(moduleId, "MT_GENERIC");
