@@ -114,6 +114,5 @@ void loop() {
 			delay(3900);              // wait for a second 
 		}
 	}
-
 }
 
