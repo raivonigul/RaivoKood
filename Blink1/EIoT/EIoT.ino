@@ -73,7 +73,7 @@ void setup() {
 	int temp;
 
 	DS18B20.requestTemperatures();
-	temp = DS18B20.getTemp(0);
+	temp = 100 * DS18B20.getTempCByIndex(0);
 	DEBUG_PRINT("Temperature: ");
 	DEBUG_PRINT(rtcBuffer.tempperature);
 	DEBUG_PRINT("-->");
@@ -126,7 +126,7 @@ void setup() {
 
 		// send temperature
 		float vccf = vcc / 851.5;
-		float tempf = temp / 128.0;
+		float tempf = temp / 100.0;
 		bool valueRet = eiotcloud.SetParameterValue(parameterId, String(tempf));
 		DEBUG_PRINT("Set Temperature: ");
 		DEBUG_PRINTLN(valueRet);
