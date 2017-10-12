@@ -20,6 +20,15 @@ EIoTCloudRestApi eiotcloud;
 #define LED_PIN 15  // 
 #define SLEEPTIME 60*1*1000000
 
+#ifdef DEBUG_PROG
+#define DEBUG_LED_ON  digitalWrite(LED_PIN, HIGH)
+#define DEBUG_LED_OFF  digitalWrite(LED_PIN, LOW)
+#else
+#define DEBUG_LED_ON 
+#define DEBUG_LED_OFF
+#endif
+
+
 OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature DS18B20(&oneWire);
 
@@ -53,12 +62,22 @@ void setup() {
 	Serial.begin(115200);
 	DEBUG_PRINTLN("Start...");
 	pinMode(LED_PIN, OUTPUT);
-	digitalWrite(LED_PIN, HIGH);
-
+	DEBUG_LED_ON;
 	rst_info *rsti;
 	rsti = ESP.getResetInfoPtr();
 
 	system_rtc_mem_read(64, &rtcBuffer, 8);
+
+
+
+	int temp;
+
+	DS18B20.requestTemperatures();
+	temp = DS18B20.getTemp(0);
+	DEBUG_PRINT("Temperature: ");
+	DEBUG_PRINT(rtcBuffer.tempperature);
+	DEBUG_PRINT("-->");
+	DEBUG_PRINTLN(temp);
 
 
 	int vcc = ESP.getVcc();
@@ -67,7 +86,7 @@ void setup() {
 	DEBUG_PRINT("-->");
 	DEBUG_PRINTLN(vcc);
 
-	if (vcc != rtcBuffer.vcc)
+	if (!(vcc == rtcBuffer.vcc && temp  == rtcBuffer.tempperature))
 	{
 
 		//start WiFi
@@ -107,17 +126,19 @@ void setup() {
 
 		// send temperature
 		float vccf = vcc / 851.5;
-		bool valueRet = eiotcloud.SetParameterValue(parameterId, String(vccf));
-		DEBUG_PRINT("SetParameterValue: ");
+		float tempf = temp / 128.0;
+		bool valueRet = eiotcloud.SetParameterValue(parameterId, String(tempf));
+		DEBUG_PRINT("Set Temperature: ");
 		DEBUG_PRINTLN(valueRet);
 
 		// send temperature
 		valueRet = eiotcloud.SetParameterValue(parameterId2, String(vccf));
-		DEBUG_PRINT("SetParameterValue2: ");
+		DEBUG_PRINT("Set Vcc: ");
 		DEBUG_PRINTLN(valueRet);
 
 		//save to buffer
 		rtcBuffer.vcc = vcc;
+		rtcBuffer.tempperature = temp;
 		system_rtc_mem_write(64, &rtcBuffer, 8);
 
 
@@ -128,20 +149,21 @@ void setup() {
 	DEBUG_PRINT("Writing to Cloud done. It took ");
 	DEBUG_PRINT(millis() - startTime) / 1000.0;
 	DEBUG_PRINTLN(" Seconds ");
+	DEBUG_LED_OFF;
 	ESP.deepSleep(SLEEPTIME, WAKE_NO_RFCAL);
-	
+
 }
 
 
 void loop() {
-	//float temp;
+	//int temp;
 
-	////do {
-	////	DS18B20.requestTemperatures();
-	////	temp = DS18B20.getTempCByIndex(0);
-	////	DEBUG_PRINT("Temperature: ");
-	////	DEBUG_PRINTLN(temp);
-	////} while (temp == 85.0 || temp == (-127.0));
+	//do {
+	//	DS18B20.requestTemperatures();
+	//	temp = DS18B20.getTemp(0);
+	//	DEBUG_PRINT("Temperature: ");
+	//	DEBUG_PRINTLN(temp);
+	//} while (temp == 85.0 || temp == (-127.0));
 
 	//float vcc = ESP.getVcc() / 851.5;
 	//DEBUG_PRINT("Vcc: ");
