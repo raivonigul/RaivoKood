@@ -18,14 +18,14 @@ EIoTCloudRestApi eiotcloud;
 
 #define ONE_WIRE_BUS 2  // DS18B20 pin
 #define LED_PIN 15  // 
-#define SLEEPTIME 60*1*1000000
+#define SLEEPTIME 60*REPORT_INTERVAL*1000000
 
 #ifdef DEBUG_PROG
 #define DEBUG_LED_ON  digitalWrite(LED_PIN, HIGH)
 #define DEBUG_LED_OFF  digitalWrite(LED_PIN, LOW)
 #else
-#define DEBUG_LED_ON 
-#define DEBUG_LED_OFF
+#define DEBUG_LED_ON  digitalWrite(LED_PIN, HIGH)
+#define DEBUG_LED_OFF  digitalWrite(LED_PIN, LOW)
 #endif
 
 
@@ -147,7 +147,7 @@ void setup() {
 
 	//deepleep
 	DEBUG_PRINT("Writing to Cloud done. It took ");
-	DEBUG_PRINT(millis() - startTime) / 1000.0;
+	DEBUG_PRINT((millis() - startTime) / 1000.0);
 	DEBUG_PRINTLN(" Seconds ");
 	DEBUG_LED_OFF;
 	ESP.deepSleep(SLEEPTIME, WAKE_NO_RFCAL);
@@ -156,44 +156,6 @@ void setup() {
 
 
 void loop() {
-	//int temp;
-
-	//do {
-	//	DS18B20.requestTemperatures();
-	//	temp = DS18B20.getTemp(0);
-	//	DEBUG_PRINT("Temperature: ");
-	//	DEBUG_PRINTLN(temp);
-	//} while (temp == 85.0 || temp == (-127.0));
-
-	//float vcc = ESP.getVcc() / 851.5;
-	//DEBUG_PRINT("Vcc: ");
-	//DEBUG_PRINTLN(vcc);
-
-
-	//if (tempOld != vcc)
-	//{
-	//	// send temperature
-	//	bool valueRet = eiotcloud.SetParameterValue(parameterId, String(vcc));
-	//	DEBUG_PRINT("SetParameterValue: ");
-	//	DEBUG_PRINTLN(valueRet);
-	//	tempOld = vcc;
-	//}
-	//if (vccOld != vcc)
-	//{
-	//	// send temperature
-	//	bool valueRet = eiotcloud.SetParameterValue(parameterId2, String(vcc));
-	//	DEBUG_PRINT("SetParameterValue2: ");
-	//	DEBUG_PRINTLN(valueRet);
-	//	vccOld = vcc;
-	//}
-
-	//for (int i = 0; i < REPORT_INTERVAL; i++) {
-	//	for (int j = 0; j < 5; j++) {
-	//		digitalWrite(LED_PIN, HIGH);   // turn the LED on (HIGH is the voltage level)
-	//		delay(100);              // wait for a second
-	//		digitalWrite(LED_PIN, LOW);    // turn the LED off by making the voltage LOW
-	//		delay(3900);              // wait for a second 
-	//	}
-	//}
+	
 }
 
