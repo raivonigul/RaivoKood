@@ -86,64 +86,74 @@ void setup() {
 	DEBUG_PRINT("-->");
 	DEBUG_PRINTLN(vcc);
 
-	if (!(vcc == rtcBuffer.vcc && temp  == rtcBuffer.tempperature))
+	if (vcc == rtcBuffer.vcc && temp == rtcBuffer.tempperature)
 	{
-
-		//start WiFi
-		loadConfig(&storage, sizeof(storage));
-
-
-		eiotcloud.begin(AP_USERNAME, AP_PASSWORD);
-
-		// if first time get new token and register new module
-		// here hapend Plug and play logic to add module to Cloud
-		if (storage.moduleId == 0)
-		{
-			createNewConfig(&storage, eiotcloud);
-			DEBUG_PRINT("createNewConfig returned storage.moduleId: ");
-			DEBUG_PRINTLN(storage.moduleId);
-
-			//save configuration
-			saveConfig(storage);
-		}
-
-		// if something went wrong, wiat here
-		if (storage.moduleId == 0)
-			delay(1);
-
-		// read module ID from storage
-		moduleId = String(storage.moduleId);
-		DEBUG_PRINT("moduleId: ");
-		DEBUG_PRINTLN(moduleId);
-		// read token ID from storage
-		eiotcloud.SetToken(storage.token);
-		// read Sensor.Parameter1 ID from cloud
-		parameterId = eiotcloud.GetModuleParameterByName(moduleId, "Sensor.Parameter1");
-		parameterId2 = eiotcloud.GetModuleParameterByName(moduleId, "Sensor.Parameter2");
-		DEBUG_PRINT("parameterId: ");
-		DEBUG_PRINTLN(parameterId);
-
-
-		// send temperature
-		float vccf = vcc / 851.5;
-		float tempf = temp / 100.0;
-		bool valueRet = eiotcloud.SetParameterValue(parameterId, String(tempf));
-		DEBUG_PRINT("Set Temperature: ");
-		DEBUG_PRINTLN(valueRet);
-
-		// send temperature
-		valueRet = eiotcloud.SetParameterValue(parameterId2, String(vccf));
-		DEBUG_PRINT("Set Vcc: ");
-		DEBUG_PRINTLN(valueRet);
-
-		//save to buffer
-		rtcBuffer.vcc = vcc;
-		rtcBuffer.tempperature = temp;
-		system_rtc_mem_write(64, &rtcBuffer, 8);
-
-
+		DEBUG_PRINTLN("No changes, DeepSleep");
+		DEBUG_LED_OFF;
+		ESP.deepSleep(SLEEPTIME, WAKE_NO_RFCAL);
+	}
+	if (temp > 5000 || temp < -5000)
+	{
+		DEBUG_PRINTLN("Temperature out of range, DeepSleep");
+		DEBUG_LED_OFF;
+		ESP.deepSleep(SLEEPTIME, WAKE_NO_RFCAL);
 	}
 
+	//start WiFi
+	loadConfig(&storage, sizeof(storage));
+
+	if (!eiotcloud.begin(AP_USERNAME, AP_PASSWORD))
+	{
+		DEBUG_PRINTLN("Wifi connection failed, DeepSleep");
+		DEBUG_LED_OFF;
+		ESP.deepSleep(SLEEPTIME, WAKE_NO_RFCAL);
+	}
+
+	// if first time get new token and register new module
+	// here hapend Plug and play logic to add module to Cloud
+	if (storage.moduleId == 0)
+	{
+		createNewConfig(&storage, eiotcloud);
+		DEBUG_PRINT("createNewConfig returned storage.moduleId: ");
+		DEBUG_PRINTLN(storage.moduleId);
+
+		//save configuration
+		saveConfig(storage);
+	}
+
+	// if something went wrong, wiat here
+	if (storage.moduleId == 0)
+		delay(1);
+
+	// read module ID from storage
+	moduleId = String(storage.moduleId);
+	DEBUG_PRINT("moduleId: ");
+	DEBUG_PRINTLN(moduleId);
+	// read token ID from storage
+	eiotcloud.SetToken(storage.token);
+	// read Sensor.Parameter1 ID from cloud
+	parameterId = eiotcloud.GetModuleParameterByName(moduleId, "Sensor.Parameter1");
+	parameterId2 = eiotcloud.GetModuleParameterByName(moduleId, "Sensor.Parameter2");
+	DEBUG_PRINT("parameterId: ");
+	DEBUG_PRINTLN(parameterId);
+
+
+	// send temperature
+	float vccf = vcc / 851.5;
+	float tempf = temp / 100.0;
+	bool valueRet = eiotcloud.SetParameterValue(parameterId, String(tempf));
+	DEBUG_PRINT("Set Temperature: ");
+	DEBUG_PRINTLN(valueRet);
+
+	// send temperature
+	valueRet = eiotcloud.SetParameterValue(parameterId2, String(vccf));
+	DEBUG_PRINT("Set Vcc: ");
+	DEBUG_PRINTLN(valueRet);
+
+	//save to buffer
+	rtcBuffer.vcc = vcc;
+	rtcBuffer.tempperature = temp;
+	system_rtc_mem_write(64, &rtcBuffer, 8);
 
 	//deepleep
 	DEBUG_PRINT("Writing to Cloud done. It took ");
@@ -151,11 +161,10 @@ void setup() {
 	DEBUG_PRINTLN(" Seconds ");
 	DEBUG_LED_OFF;
 	ESP.deepSleep(SLEEPTIME, WAKE_NO_RFCAL);
-
 }
 
 
 void loop() {
-	
+
 }
 

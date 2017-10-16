@@ -17,16 +17,16 @@ EIoTCloudRestApi::EIoTCloudRestApi() {
 }
 
 
-void EIoTCloudRestApi::begin(const char* ssid, const char* password) {
+bool EIoTCloudRestApi::begin(const char* ssid, const char* password) {
 	begin(ssid, password, "");
 }
 
-void EIoTCloudRestApi::begin(const char* ssid, const char* password, String token) {
+bool EIoTCloudRestApi::begin(const char* ssid, const char* password, String token) {
 	_ssid = ssid;
 	_password = password;
 	_token = token;
 
-	wifiConnect();
+	return wifiConnect();
 }
 
 
@@ -739,18 +739,22 @@ bool EIoTCloudRestApi::parseResponse(WiFiClient* client)
 }
 
 
-void EIoTCloudRestApi::wifiConnect()
+bool EIoTCloudRestApi::wifiConnect()
 {
   debug("Connecting to AP");
   WiFi.mode(WIFI_STA);
   WiFi.begin(_ssid, _password);
+  int timeCount = 0;
   while (WiFi.status() != WL_CONNECTED) {
     delay(1000);
     Serial.print(".");
+	timeCount++;
+	if (timeCount > 10) return false;
   }
   
   debug("");
   debug("WiFi connected");  
+  return true;
 }
 
 

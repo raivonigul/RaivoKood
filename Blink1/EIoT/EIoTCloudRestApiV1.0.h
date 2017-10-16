@@ -43,8 +43,8 @@ class EIoTCloudRestApi
 
 	public:
 		EIoTCloudRestApi();	
-		void begin(const char* ssid, const char* password, String token);
-		void begin(const char* ssid, const char* password);
+		bool begin(const char* ssid, const char* password, String token);
+		bool begin(const char* ssid, const char* password);
 
 		String TokenNew(String instance);
 		bool TokenList(String instance, int *, String**);
@@ -97,7 +97,7 @@ private:
 		void printDebug(const char *fmt, ...);
 #endif		
 protected:
-	void wifiConnect();
+	bool wifiConnect();
 	
 };
 
