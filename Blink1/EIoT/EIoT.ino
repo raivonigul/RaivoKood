@@ -62,7 +62,6 @@ void setup() {
 	Serial.begin(115200);
 	DEBUG_PRINTLN("Start...");
 	pinMode(LED_PIN, OUTPUT);
-	DEBUG_LED_ON;
 	rst_info *rsti;
 	rsti = ESP.getResetInfoPtr();
 
@@ -72,12 +71,6 @@ void setup() {
 
 	int temp;
 
-	DS18B20.requestTemperatures();
-	temp = 100 * DS18B20.getTempCByIndex(0);
-	DEBUG_PRINT("Temperature: ");
-	DEBUG_PRINT(rtcBuffer.tempperature);
-	DEBUG_PRINT("-->");
-	DEBUG_PRINTLN(temp);
 
 
 	int vcc = ESP.getVcc();
@@ -86,17 +79,26 @@ void setup() {
 	DEBUG_PRINT("-->");
 	DEBUG_PRINTLN(vcc);
 
+
+	int timeCount = 0;
+	do {
+		delay(10);
+		DS18B20.requestTemperatures();
+		temp = 100 * DS18B20.getTempCByIndex(0);
+		Serial.print(".");
+		DEBUG_PRINTLN(temp);
+		timeCount++;
+		if (timeCount > 10) 
+			goToDeepSleep(3, "Temperature out of range, DeepSleep"); //2x
+	} while (temp > 5000 || temp < -5000);
+	DEBUG_PRINT("Temperature: ");
+	DEBUG_PRINT(rtcBuffer.tempperature);
+	DEBUG_PRINT("-->");
+	DEBUG_PRINTLN(temp);
+
 	if (vcc == rtcBuffer.vcc && temp == rtcBuffer.tempperature)
 	{
-		DEBUG_PRINTLN("No changes, DeepSleep");
-		DEBUG_LED_OFF;
-		ESP.deepSleep(SLEEPTIME, WAKE_NO_RFCAL);
-	}
-	if (temp > 5000 || temp < -5000)
-	{
-		DEBUG_PRINTLN("Temperature out of range, DeepSleep");
-		DEBUG_LED_OFF;
-		ESP.deepSleep(SLEEPTIME, WAKE_NO_RFCAL);
+		goToDeepSleep(1,"No changes, DeepSleep");//3x
 	}
 
 	//start WiFi
@@ -104,9 +106,7 @@ void setup() {
 
 	if (!eiotcloud.begin(AP_USERNAME, AP_PASSWORD))
 	{
-		DEBUG_PRINTLN("Wifi connection failed, DeepSleep");
-		DEBUG_LED_OFF;
-		ESP.deepSleep(SLEEPTIME, WAKE_NO_RFCAL);
+		goToDeepSleep(4, "Wifi connection failed, DeepSleep");//4x
 	}
 
 	// if first time get new token and register new module
@@ -159,10 +159,23 @@ void setup() {
 	DEBUG_PRINT("Writing to Cloud done. It took ");
 	DEBUG_PRINT((millis() - startTime) / 1000.0);
 	DEBUG_PRINTLN(" Seconds ");
+	goToDeepSleep(2, "Writing to Cloud done.");	//1x
+}
+
+void goToDeepSleep(int blinks, String message)
+{
+	DEBUG_PRINTLN(message);
+	for (int i = 0; i <= blinks; i++)
+	{
+		DEBUG_LED_ON;
+		delay(500);
+		DEBUG_LED_OFF;
+		delay(500);
+	}
+	DEBUG_PRINTLN("Go to sleep");
 	DEBUG_LED_OFF;
 	ESP.deepSleep(SLEEPTIME, WAKE_NO_RFCAL);
 }
-
 
 void loop() {
 

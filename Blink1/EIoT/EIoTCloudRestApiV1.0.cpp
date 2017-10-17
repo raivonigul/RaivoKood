@@ -18,7 +18,7 @@ EIoTCloudRestApi::EIoTCloudRestApi() {
 
 
 bool EIoTCloudRestApi::begin(const char* ssid, const char* password) {
-	begin(ssid, password, "");
+	return begin(ssid, password, "");
 }
 
 bool EIoTCloudRestApi::begin(const char* ssid, const char* password, String token) {
